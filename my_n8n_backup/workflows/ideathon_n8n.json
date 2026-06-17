@@ -1,0 +1,460 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "triggerOn": "folder",
+        "path": "/data/shared/jds",
+        "events": [
+          "add"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.localFileTrigger",
+      "typeVersion": 1,
+      "position": [
+        -864,
+        -480
+      ],
+      "id": "eed31a31-7876-48ff-85e6-74d4f83a4ace",
+      "name": "JD local file",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "triggerOn": "folder",
+        "path": "/data/shared/resumes",
+        "events": [
+          "add"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.localFileTrigger",
+      "typeVersion": 1,
+      "position": [
+        -912,
+        272
+      ],
+      "id": "08047c84-50d3-482a-9798-ad8d982a7aa2",
+      "name": "resume local file",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "When you click a button on the UI , you will save the JD and resume and save in a local space as the system. And here system is docker env created with .env\n\n\nAdd a trigger buttin to start both at once",
+        "height": 320,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1584,
+        -416
+      ],
+      "typeVersion": 1,
+      "id": "99e02071-2d84-4736-a76b-5c4554022d90",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {
+          "includeUnpaired": false
+        }
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -240,
+        320
+      ],
+      "id": "265ba91b-1645-442f-8451-efe234b466a8",
+      "name": "Merge",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert recruiter with years of expertise to give candidates constructive feedback on their resume. \n\nAnalyze the resume against the job description.\n\nJOB DESCRIPTION:\n{{ $json.job_description }}\n\n==================================================\n\nRESUME:\n{{ $json.resume }}\n\n==================================================\n\nPerform the following analysis:\n\n1. Candidate Summary\n\n2. Matching Skills\n- List skills from the JD found in the resume.\n\n3. Missing Skills\n- List important JD skills not found in the resume.\n\n4. Skills Requiring Improvement\n- List skills where candidate has some exposure but needs stronger evidence.\n\nReturn the response in Markdown format.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        352,
+        -128
+      ],
+      "id": "44767f45-36bc-478a-8415-7b894d0e0bde",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:latest",
+        "options": {
+          "numCtx": 2048
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        352,
+        96
+      ],
+      "id": "01a9f09a-231e-47e1-8a87-e05e6a65aba2",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "kyvUM1w8A3e7kYyT",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $json.path }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -560,
+        -192
+      ],
+      "id": "2d276f42-147d-4513-884c-07ad4bc7efb0",
+      "name": "Read/Write Files from JD Directory"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $json.path }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -576,
+        0
+      ],
+      "id": "2c8fd440-ecc1-48b9-84e2-ff335cec316d",
+      "name": "Read/Write Files from Resume Directory"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -336,
+        -192
+      ],
+      "id": "6360d038-e92a-4682-8a14-3ae99b0b7f1e",
+      "name": "Extract from JD"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -368,
+        0
+      ],
+      "id": "e521fbee-0517-499a-9233-ca3aadaabc9e",
+      "name": "Extract from Resume"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1296,
+        -64
+      ],
+      "id": "d599cd47-ab6e-4648-9de4-04c8a28c7f5b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"path\": \"/data/shared/jds/job_description.pdf\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -912,
+        -176
+      ],
+      "id": "2bee4eae-dbeb-4684-9f34-4985d49a0079",
+      "name": "Set JD Path"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"path\": \"/data/shared/resumes/resume.pdf\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -912,
+        16
+      ],
+      "id": "3561c7b0-089c-495b-a3ce-e048646fdc15",
+      "name": "Set Resume Path"
+    },
+    {
+      "parameters": {
+        "jsCode": "const jd = $items(\"Extract from JD\")[0].json.text;\nconst resume = $items(\"Extract from Resume\")[0].json.text;\n\nreturn [\n  {\n    json: {\n      job_description: jd,\n      resume: resume\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        -128
+      ],
+      "id": "edfb36bb-c32c-4283-a03d-3673f3e17e3d",
+      "name": "Code in JavaScript",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6678e38d-6a9d-4d7b-8f4c-23742353dde3",
+              "name": "job_description",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -128,
+        -192
+      ],
+      "id": "9a244a7c-e9eb-4a8c-8b27-d88abffbdb06",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ac23601e-7af5-4bf7-a25f-c883a9a07ae3",
+              "name": "resume",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -160,
+        0
+      ],
+      "id": "b2b7a6e7-8c31-4588-985f-91f02abec753",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        48,
+        -128
+      ],
+      "id": "bd7995a4-10cd-46d7-8af5-91cb65955366",
+      "name": "Merge1"
+    }
+  ],
+  "connections": {
+    "JD local file": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from JD Directory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "resume local file": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Resume Directory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        []
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        []
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from JD Directory": {
+      "main": [
+        [
+          {
+            "node": "Extract from JD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Resume Directory": {
+      "main": [
+        [
+          {
+            "node": "Extract from Resume",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from JD": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from Resume": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Set JD Path",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Set Resume Path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set JD Path": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from JD Directory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Resume Path": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Resume Directory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  }
+}
