@@ -55,24 +55,6 @@
     },
     {
       "parameters": {
-        "mode": "combine",
-        "combineBy": "combineByPosition",
-        "options": {
-          "includeUnpaired": false
-        }
-      },
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        -240,
-        320
-      ],
-      "id": "265ba91b-1645-442f-8451-efe234b466a8",
-      "name": "Merge",
-      "disabled": true
-    },
-    {
-      "parameters": {
         "promptType": "define",
         "text": "=You are an expert recruiter with years of expertise to give candidates constructive feedback on their resume. \n\nAnalyze the resume against the job description.\n\nJOB DESCRIPTION:\n{{ $json.job_description }}\n\n==================================================\n\nRESUME:\n{{ $json.resume }}\n\n==================================================\n\nPerform the following analysis:\n\n1. Candidate Summary\n\n2. Matching Skills\n- List skills from the JD found in the resume.\n\n3. Missing Skills\n- List important JD skills not found in the resume.\n\n4. Skills Requiring Improvement\n- List skills where candidate has some exposure but needs stronger evidence.\n\nReturn the response in Markdown format.",
         "batching": {}
@@ -279,6 +261,38 @@
       ],
       "id": "bd7995a4-10cd-46d7-8af5-91cb65955366",
       "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "text",
+        "options": {
+          "fileName": "=candidate_report_{{$now.format(\"yyyyMMdd_HHmmss\")}}.md"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        -128
+      ],
+      "id": "a3c22848-02d0-4ea2-9918-251470e045ee",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/data/shared/reports/candidate_report_{{$now.format(\"yyyyMMdd_HHmmss\")}}.md",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        928,
+        -128
+      ],
+      "id": "f755dba4-6646-4fab-834c-2af09beff922",
+      "name": "Read/Write Files from Disk"
     }
   ],
   "connections": {
@@ -304,14 +318,15 @@
         ]
       ]
     },
-    "Merge": {
-      "main": [
-        []
-      ]
-    },
     "Basic LLM Chain": {
       "main": [
-        []
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Ollama Chat Model": {
@@ -450,9 +465,26 @@
           }
         ]
       ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "pinData": {},
+  "pinData": {
+    "Basic LLM Chain": [
+      {
+        "text": "**Candidate Summary**\nThe candidate's name is not mentioned in the provided information, and they are a data freelancer with experience in machine learning model development, web application deployment, and streamlit dashboard creation. They have completed postgraduate studies in data science and hold a bachelor's degree in Vellore Institute of Technology.\n\n**Matching Skills**\n\nBased on the job description (JD), the following skills are mentioned:\n\n* Python\n* Git\n* Streamlit\n* Gradio\n* HuggingFace Spaces\n* Kaggle\n* Docker\n* Yahoo Finance API\n* Jupyter Notebooks\n* VS code\n\nSome matching skills from the candidate's resume are:\n\n* Python (multiple projects, including \"Long-term Financial News with LLMs\")\n* Git (multiple projects)\n* Streamlit (as a freelancer, they created a streamlit dashboard for a client)\n* Gradio (as mentioned in the \"Shell’s Cyber Threat Detection Hackathon\" project)\n\n**Missing Skills**\n\nThe JD mentions the following important skills that are not found in the candidate's resume:\n\n* Data Science\n* NLP\n* Deep Learning\n* Computer Vision\n* Cloud Computing (AWS or GCP)\n* Natural Language Processing\n* Machine Learning frameworks (e.g., TensorFlow, PyTorch)\n\n**Skills Requiring Improvement**\n\nThe candidate has some exposure to the following skills, but needs stronger evidence:\n\n* Model Development: While they have experience with LLMs in \"Long-term Financial News with LLMs\", they lack specific examples of model development, such as training and testing models.\n* Cloud Computing: They do not mention any cloud computing experience or tools (e.g., AWS, GCP).\n* Data Science: Although they hold a postgraduate degree in data science, their resume does not showcase specific projects or experiences that demonstrate their skills.\n* NLP and Deep Learning: Their resume does not mention any experience with these areas of machine learning."
+      }
+    ]
+  },
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
